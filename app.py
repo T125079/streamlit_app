@@ -20,6 +20,7 @@ with st.sidebar:
     else:
         graph_mode = 'bar2'
 
+
     st.header("フィルターオプション")
     table = st.toggle("表を表示する",value=True)
     if graph_mode == 'bar' or graph_mode=='pie':
