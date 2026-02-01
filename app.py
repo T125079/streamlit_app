@@ -14,7 +14,7 @@ if not st.session_state.show_app:
         st.subheader("使い方")
         st.write("""
         1. 左側のサイドバーから表示するグラフの種類を選択します。
-        2. サイドバーから「性別」や「年齢層」の適用するフィルターを選択します。
+        2. サイドバーから「性別」や「年代」の適用するフィルターを選択します。
         3. グラフが更新され、睡眠時間の分布が表示されます。
         """)
         st.subheader("表示できるグラフ")
@@ -29,7 +29,7 @@ if not st.session_state.show_app:
         st.header("使用データ")
         st.write("厚生労働省が公開している「令和5年 国民健康・栄養調査」のデータを加工して使用しています。")
         st.page_link("https://www.e-stat.go.jp/stat-search/files?stat_infid=000040276088",
-            label="国民健康・栄養調査 71 １日の平均睡眠時間 - １日の平均睡眠時間、年齢階級別、人数、割合 - 総数・男性・女性、20歳以上 | ファイル | 統計データを探す | 政府統計の総合窓口",
+            label="e-Stat(政府統計の総合窓口)",
         )
 
         st.subheader("基本情報")
@@ -138,7 +138,7 @@ if not filtered_df.empty:
         )
 
     if graph_mode == "bar":
-        st.subheader("睡眠時間の構成比（性別・年代）棒グラフ")
+        st.subheader("性別 × 年代（組み合わせ別）棒グラフ")
         fig = px.bar(
             filtered_df,
             x="display_label",
@@ -152,14 +152,29 @@ if not filtered_df.empty:
             }
         )
         st.plotly_chart(fig, use_container_width=True)
+        st.info("""
+        **【データの読み取り】**
+        * すべての組み合わせで「5時間以上6時間未満」「6時間以上7時間未満」の合計の「5時間以上7時間未満」で50%を超えている。
+        """)
     
     elif graph_mode == "pie":
-        st.subheader("睡眠時間の構成比個別表示")
-        bar2_order = sorted(filtered_df["sleep"].unique())
+        st.subheader("性別 × 年代（組み合わせ別）円グラフ")
+        pie_order = [
+            "5時間未満", 
+            "5時間以上6時間未満", 
+            "6時間以上7時間未満", 
+            "7時間以上8時間未満", 
+            "8時間以上9時間未満",
+            "9時間以上"
+        ]
+        existing_labels = filtered_df["sleep"].unique()
+        pie_order = [label for label in pie_order if label in existing_labels]
+        remaining = [l for l in existing_labels if l not in pie_order]
+        pie_order.extend(remaining)
         colors = px.colors.qualitative.Plotly
         color_map = {
             label: colors[i % len(colors)]
-            for i, label in enumerate(bar2_order)
+            for i, label in enumerate(pie_order)
         }
         charts_data = []
         for sex in sex_options:
@@ -184,7 +199,7 @@ if not filtered_df.empty:
                                 values="percentage",
                                 names="sleep",
                                 hole=0.5,
-                                category_orders={"sleep": bar2_order},
+                                category_orders={"sleep": pie_order},
                                 color="sleep",
                                 color_discrete_map=color_map
                             )
@@ -209,7 +224,7 @@ if not filtered_df.empty:
                 "<div style='text-align: center; "
                 "margin-top: -10px; margin-bottom: 20px;'>"
             )
-            for label in bar2_order:
+            for label in pie_order:
                 color = color_map[label]
                 legend_html += (
                     f"<span style='color:{color}; "
@@ -219,9 +234,13 @@ if not filtered_df.empty:
                 )
             legend_html += "</div>"
             st.markdown(legend_html, unsafe_allow_html=True)
+        st.info("""
+        **【データの読み取り】**
+        * すべての組み合わせを見ると「6時間以上7時間未満」の階級が最も高い割合を占めている。
+        """)
 
     elif graph_mode == "bar2":
-        st.subheader("睡眠時間ごとの割合（性別・年代）棒グラフ")
+        st.subheader("睡眠時間別（性別または年代）棒グラフ")
         
         fig = px.bar(
             filtered_df,
@@ -236,5 +255,9 @@ if not filtered_df.empty:
             }
         )
         st.plotly_chart(fig, use_container_width=True)
+        st.info("""
+        **【データの読み取り】**
+        * 男性、女性、すべてそれぞれが、40代、50代になると睡眠時間が短くなるが、60代以降は再び睡眠時間が長くなっている。
+        """)
 else:
     st.warning("選択された条件に該当するデータがありません。")
