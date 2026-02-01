@@ -20,7 +20,6 @@ with st.sidebar:
     else:
         graph_mode = 'bar2'
 
-
     st.header("フィルターオプション")
     table = st.toggle("表を表示する",value=True)
     if graph_mode in ['bar', 'pie']:
@@ -41,32 +40,32 @@ with st.sidebar:
             df['age'].isin(age_options)
         ]
     else:
-            bar2_show_options = st.selectbox(
-                "表示する設定を選択してください",
-                ["性別", "年代"]
-            )
-            bar2_map = {
-                "性別": "sex",
-                "年代": "age"
-            }
-            bar2_color_col = bar2_map[bar2_show_options]
-            if bar2_color_col == "sex":
-                bar2_age = st.radio(
-                    "表示する年代を選択してください。",
-                    df["age"].unique(),
-                    horizontal=True
+            with st.expander("表示項目オプション"):
+                bar2_show_options = st.selectbox(
+                    "表示する設定を選択してください",
+                    ["性別", "年代"]
                 )
-                filtered_df = df[df["age"] == bar2_age].copy()
+                bar2_map = {
+                    "性別": "sex",
+                    "年代": "age"
+                }
+                bar2_color_col = bar2_map[bar2_show_options]
+                if bar2_color_col == "sex":
+                    bar2_age = st.radio(
+                        "表示する年代を選択してください。",
+                        df["age"].unique(),
+                        horizontal=True
+                    )
+                    filtered_df = df[df["age"] == bar2_age].copy()
 
-            else:
-                bar2_sex = st.radio(
-                    "表示する性別を選択してください。",
-                    df["sex"].unique(),
-                    horizontal=True
-                )
-                filtered_df = df[df["sex"] == bar2_sex].copy()
+                else:
+                    bar2_sex = st.radio(
+                        "表示する性別を選択してください。",
+                        df["sex"].unique(),
+                        horizontal=True
+                    )
+                    filtered_df = df[df["sex"] == bar2_sex].copy()
                 
-
 if not filtered_df.empty:
     jp_columns = {
         "sex": "性別",
@@ -80,7 +79,7 @@ if not filtered_df.empty:
         filtered_df["display_label"] = filtered_df["sex"] + " " + filtered_df["age"]
 
     if table:
-        st.subheader("絞り込みデータ一覧")
+        st.subheader("絞り込みデータ")
         st.dataframe(
             filtered_df.rename(columns=jp_columns),
             use_container_width=True
@@ -187,7 +186,6 @@ if not filtered_df.empty:
 
 else:
     st.warning("選択された条件に該当するデータがありません。")
-
 
 st.write(
     "国民健康・栄養調査 / 令和５年国民健康・栄養調査 第71表"
