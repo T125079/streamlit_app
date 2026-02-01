@@ -2,20 +2,72 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.title('１日の平均睡眠時間')
-
+st.title('年代・性別別 睡眠時間の分布')
 df = pd.read_csv('sleep.csv')
 
+if "show_app" not in st.session_state:
+    st.session_state.show_app = False
+if not st.session_state.show_app:
+        st.header("アプリの概要")
+        st.subheader("目的")
+        st.write("このアプリは、厚生労働省の統計データを基に、日本人の睡眠時間の傾向を可視化することを目的としています。")
+        st.subheader("使い方")
+        st.write("""
+        1. 左側のサイドバーから表示するグラフの種類を選択します。
+        2. サイドバーから「性別」や「年齢層」の適用するフィルターを選択します。
+        3. グラフが更新され、睡眠時間の分布が表示されます。
+        """)
+        st.subheader("表示できるグラフ")
+        st.markdown("""
+        本アプリでは、以下の3つのグラフから傾向を確認できます。
+        * **性別 × 年代（組み合わせ別）棒グラフ**: 性別と年代の組み合わせごとに、睡眠時間の割合を比較できます。
+        * **性別 × 年代（組み合わせ別）円グラフ**: 各性別・年代における睡眠時間の構成比を、円グラフで視覚的に確認できます。
+        * **睡眠時間別（性別または年代）棒グラフ**: 各睡眠時間ごとの性別または年代ごとの割合を特定の性別、年代で比較できます。
+        """)
+
+        st.divider()
+        st.header("使用データ")
+        st.write("厚生労働省が公開している「令和5年 国民健康・栄養調査」のデータを加工して使用しています。")
+        st.page_link("https://www.e-stat.go.jp/stat-search/files?stat_infid=000040276088",
+            label="国民健康・栄養調査 71 １日の平均睡眠時間 - １日の平均睡眠時間、年齢階級別、人数、割合 - 総数・男性・女性、20歳以上 | ファイル | 統計データを探す | 政府統計の総合窓口",
+        )
+
+        st.subheader("基本情報")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("調査年", "2023年 (令和5年)")
+            st.metric("有効回答数", "5,437人")
+        with col2:
+            st.metric("対象", "20歳以上")
+            st.write("**調査方法:** 生活習慣調査票への回答")
+
+        with st.expander("調査内容の詳細を表示"):
+            st.write("""
+            **設問:** 「ここ１ヶ月間、あなたの１日の平均睡眠時間はどのくらいでしたか。あてはまる番号を１つ選んで○印をつけて下さい。」
+            この回答を集計対象としています。
+            """)
+
+        st.divider()
+
+        if st.button("データを見てみる", use_container_width=True):
+            st.session_state.show_app = True
+            st.rerun()
+
+        st.stop()
 with st.sidebar:
+    if st.session_state.show_app:
+        if st.button("ホームに戻る",use_container_width=True):
+            st.session_state.show_app = False
+            st.rerun()
+
     st.header("表示グラフオプション")
     graph_selection = st.radio(
         "表示するグラフの種類を選択してください。",
-        ["性別、年代ごとの棒グラフ", "性別、年代ごとの円グラフ","睡眠時間別年代および性別の棒グラフ"]
+        ["性別 × 年代（組み合わせ別）棒グラフ", "性別 × 年代（組み合わせ別）円グラフ","睡眠時間別（性別または年代）棒グラフ"]
     )
-    
-    if graph_selection == "性別、年代ごとの棒グラフ":
+    if graph_selection == "性別 × 年代（組み合わせ別）棒グラフ":
         graph_mode = 'bar'
-    elif graph_selection == "性別、年代ごとの円グラフ":
+    elif graph_selection == "性別 × 年代（組み合わせ別）円グラフ":
         graph_mode = 'pie'
     else:
         graph_mode = 'bar2'
@@ -23,7 +75,7 @@ with st.sidebar:
     st.header("フィルターオプション")
     table = st.toggle("表を表示する",value=True)
     if graph_mode in ['bar', 'pie']:
-        with st.expander("表示項目オプション"):
+        with st.expander("表示項目オプション", expanded=True):
             sex_options = st.multiselect(
                 "性別を選択してください。",
                 df['sex'].unique(),
@@ -100,6 +152,7 @@ if not filtered_df.empty:
             }
         )
         st.plotly_chart(fig, use_container_width=True)
+    
     elif graph_mode == "pie":
         st.subheader("睡眠時間の構成比個別表示")
         bar2_order = sorted(filtered_df["sleep"].unique())
@@ -183,12 +236,5 @@ if not filtered_df.empty:
             }
         )
         st.plotly_chart(fig, use_container_width=True)
-
 else:
     st.warning("選択された条件に該当するデータがありません。")
-
-st.write(
-    "国民健康・栄養調査 / 令和５年国民健康・栄養調査 第71表"
-    "１日の平均睡眠時間 - １日の平均睡眠時間、年齢階級別、人数、割合 - "
-    "総数・男性・女性、20歳以上 を改変し作成"
-)
