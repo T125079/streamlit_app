@@ -18,7 +18,7 @@ if not st.session_state.show_app:
         3. グラフが更新され、睡眠時間の分布が表示されます。
         """)
         st.subheader("表示できるグラフ")
-        st.markdown("""
+        st.write("""
         本アプリでは、以下の3つのグラフから傾向を確認できます。
         * **性別 × 年代（組み合わせ別）棒グラフ**: 性別と年代の組み合わせごとに、睡眠時間の割合を比較できます。
         * **性別 × 年代（組み合わせ別）円グラフ**: 各性別・年代における睡眠時間の構成比を、円グラフで視覚的に確認できます。
@@ -56,7 +56,7 @@ if not st.session_state.show_app:
         st.stop()
 with st.sidebar:
     if st.session_state.show_app:
-        if st.button("ホームに戻る",use_container_width=True):
+        if st.button("説明ページに戻る",use_container_width=True):
             st.session_state.show_app = False
             st.rerun()
 
