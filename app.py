@@ -93,6 +93,7 @@ if not filtered_df.empty:
             x="display_label",
             y="percentage",
             color="sleep",
+            barmode="group", 
             labels={
                 "display_label": "性別・年代",
                 "percentage": "割合（％）",
@@ -175,6 +176,7 @@ if not filtered_df.empty:
             x="sleep",
             y="percentage",
             color=bar2_color_col,
+            barmode="group", 
             labels={
                 "sleep": "睡眠時間",
                 "percentage": "割合（％）",
