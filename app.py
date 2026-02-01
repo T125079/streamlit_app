@@ -7,6 +7,7 @@ df = pd.read_csv('sleep.csv')
 
 if "show_app" not in st.session_state:
     st.session_state.show_app = False
+#説明ページ
 if not st.session_state.show_app:
         st.header("アプリの概要")
         st.subheader("目的")
@@ -54,6 +55,8 @@ if not st.session_state.show_app:
             st.rerun()
 
         st.stop()
+#メインページ
+#サイドバー
 with st.sidebar:
     if st.session_state.show_app:
         if st.button("説明ページに戻る",use_container_width=True):
@@ -117,7 +120,7 @@ with st.sidebar:
                         horizontal=True
                     )
                     filtered_df = df[df["sex"] == bar2_sex].copy()
-                
+#メインエリア  
 if not filtered_df.empty:
     jp_columns = {
         "sex": "性別",
